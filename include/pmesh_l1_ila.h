@@ -3,21 +3,20 @@
 ///
 
 
-#ifndef PMESH_L2_ILA_H__
-#define PMESH_L2_ILA_H__
+#ifndef PMESH_L1_ILA_H__
+#define PMESH_L1_ILA_H__
 
 #include <ilang/ilang++.h>
 #include <vector>
 
 using namespace ilang;
 
-#define NOC_MSG_WIDTH 8
-#define MESI_WIDTH    2
-#define DATA_WIDTH    64
-#define TAG_WIDTH     26
+#define NOC_MSG_WIDTH  8
+#define CORE_MSG_WIDTH 2
+#define MESI_WIDTH     2
+#define DATA_WIDTH     64
+#define TAG_WIDTH      26
 #define FETCH_STATE_WIDTH     3
-#define MSG_CACHE_TYPE_WIDTH  1
-#define L2_OWNER_BITS         6
 #define DIR_WIDTH    64
 
 #define b0 BoolConst(false)
@@ -25,7 +24,7 @@ using namespace ilang;
 #define zero_data BvConst(0,DATA_WIDTH)
 
 /// \brief the class of PMESH L2 ila
-class PMESH_L2_ILA {
+class PMESH_L1_ILA {
 
 public:
   // --------------- MEMBERS ----------- //
@@ -33,38 +32,33 @@ public:
   Ila model;
   
   // --------------- CONSTRUCTOR ----------- //
-  PMESH_L2_ILA();
+  PMESH_L1_ILA();
   
 protected:
 
-  // -------- Input -------- //
+  // -------- Output -------- //
 
   ExprRef msg1_type      ;
   ExprRef msg1_data      ;
-  ExprRef msg1_source    ;
   ExprRef msg1_tag       ;
 
   ExprRef msg3_type      ;
   ExprRef msg3_data      ;
-  ExprRef msg3_source    ;
   ExprRef msg3_tag       ;
 
-  // -------- output ------- //
+  // -------- Input ------- //
   ExprRef msg2_type;
-  ExprRef mesi_send;
+  ExprRef msg2_data;
+  ExprRef msg2_tag;
 
+  ExprRef core_req;
+  ExprRef core_tag;
+  ExprRef core_data;
+
+  // ------- Cache AS ------- //
   ExprRef cache_tag;
-  ExprRef cache_vd;
   ExprRef cache_state;
   ExprRef cache_data;
-  ExprRef cache_owner;
-  ExprRef share_list;
-
-  // --- Internal States --- //
-  ExprRef cur_msg_state     ;
-  ExprRef cur_msg_type      ;
-  ExprRef cur_msg_source    ;
-  ExprRef cur_msg_tag       ;
 
   // --------------- HELPERS -------- //
   /// specify a nondeterministic value within range [low,high]

@@ -1,5 +1,4 @@
-/// \file Utility function for constructing the AES model
-///  Hongce Zhang (hongcez@princeton.edu)
+/// \file Utility function
 
 #include "pmesh_l2_ila.h"
 #include <cmath>

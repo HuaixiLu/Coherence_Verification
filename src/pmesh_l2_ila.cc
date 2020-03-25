@@ -10,7 +10,6 @@
 #define MESI_WIDTH 2
 #define DATA_WIDTH  64
 #define TAG_WIDTH 26
-#define FETCH_STATE_WIDTH 3
 #define MSG_CACHE_TYPE_WIDTH  1
 #define L2_OWNER_BITS         6
 #define DIR_WIDTH            64
@@ -37,6 +36,7 @@ PMESH_L2_ILA::PMESH_L2_ILA()
       // Output states: l2 --> noc2 requests
       // not specifying these updates:   
       msg2_type       (model.NewBvState("msg2_type", NOC_MSG_WIDTH) ),
+      mesi_send       (model.NewBvState("mesi_send", MESI_WIDTH)),
 
       // architecture states
       cache_vd        (model.NewBvState("cache_vd", 2)),

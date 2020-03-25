@@ -4,13 +4,13 @@ cmake_minimum_required(VERSION 3.8)
 # PROJECT
 # name version language
 # ---------------------------------------------------------------------------- #
-project(PMESHL2 VERSION 1.0 LANGUAGES CXX)
+project(PMESH VERSION 1.0 LANGUAGES CXX)
 
 # ---------------------------------------------------------------------------- #
 # VARIABLE
 # alias and configurations
 # ---------------------------------------------------------------------------- #
-set(PMESHL2_TARGET ${PROJECT_NAME})
+set(PMESH_TARGET ${PROJECT_NAME})
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
@@ -47,24 +47,26 @@ endif()
 # TARGET
 # library
 # ---------------------------------------------------------------------------- #
-add_library(${PMESHL2_TARGET}
+add_library(${PMESH_TARGET}
   src/pmesh_l2_ila.cc
-  src/pmesh_util.cc
+  src/pmesh_util_l2.cc
+  src/pmesh_l1_ila.cc
+  src/pmesh_util_l1.cc
 )
 
-target_include_directories(${PMESHL2_TARGET} PRIVATE include)
+target_include_directories(${PMESH_TARGET} PRIVATE include)
 
-target_link_libraries(${PMESHL2_TARGET} PUBLIC ilang::ilang)
+target_link_libraries(${PMESH_TARGET} PUBLIC ilang::ilang)
 
 
 # ---------------------------------------------------------------------------- #
 # TARGET
 # executable
 # ---------------------------------------------------------------------------- #
-add_executable(${PMESHL2_TARGET}Exe
+add_executable(${PMESH_TARGET}Exe
   app/main.cc
 )
 
-target_include_directories(${PMESHL2_TARGET}Exe PRIVATE include)
+target_include_directories(${PMESH_TARGET}Exe PRIVATE include)
 
-target_link_libraries(${PMESHL2_TARGET}Exe ${PMESHL2_TARGET})
+target_link_libraries(${PMESH_TARGET}Exe ${PMESH_TARGET})
