@@ -23,6 +23,7 @@ PMESH_L1_ILA::PMESH_L1_ILA()
       msg2_type       (model.NewBvInput("msg2_type", NOC_MSG_WIDTH) ),
       msg2_data       (model.NewBvInput("msg2_data", DATA_WIDTH) ),
       msg2_tag        (model.NewBvInput("msg2_tag", TAG_WIDTH) ),
+      mesi_send       (model.NewBvInput("mesi_send", MESI_WIDTH)),
 
       core_req        (model.NewBvInput("core_req", 2)), // read or write or nothing
       core_tag        (model.NewBvInput("core_tag", TAG_WIDTH)),
@@ -215,6 +216,7 @@ PMESH_L1_ILA::PMESH_L1_ILA()
     instr.SetDecode(msg2_type == MSG_TYPE_DATA_ACK);
     
     instr.SetUpdate(msg1_type, MSG_TYPE_EMPTY);
+    instr.SetUpdate(msg3_type, MSG_TYPE_EMPTY);
     instr.SetUpdate(cache_data, msg2_data);
     instr.SetUpdate(cache_tag, msg2_tag);
   }

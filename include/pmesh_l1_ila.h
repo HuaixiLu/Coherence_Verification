@@ -50,6 +50,7 @@ protected:
   ExprRef msg2_type;
   ExprRef msg2_data;
   ExprRef msg2_tag;
+  ExprRef mesi_send;
 
   ExprRef core_req;
   ExprRef core_tag;

@@ -1,10 +1,9 @@
 analyze -sva  \
-  l15_ila.v \
+  l2.v \
   l15.v \
-  wrapper.v
+  l15cmp_mem.v \
+  ccp.v
 
-elaborate -top wrapper
+elaborate -top ccp
 clock clk
 reset rst
-
-assert -name chan1 {(msg1_type_fsm == msg1_type_ila)}

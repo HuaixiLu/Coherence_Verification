@@ -10,6 +10,7 @@ module l15 (
   input wire [`MSG_WIDTH - 1 : 0] msg2_type,
   input wire [`DATA_WIDTH - 1 : 0] msg2_data,
   input wire [`TAG_WIDTH - 1 : 0] msg2_tag,
+  input wire [`MESI_WIDTH - 1 : 0] mesi_send,
 
   input wire [1:0] core_req,
   input wire [`TAG_WIDTH - 1 : 0] core_tag,
@@ -57,9 +58,11 @@ always @(posedge clk) begin
           cache_state <= `MESI_S;
           msg3_type <= `MSG_TYPE_LOAD_FWDACK; end
       `MSG_TYPE_DATA_ACK: begin
+          cache_state <=  mesi_send;
           cache_data <= msg2_data;
           cache_tag <= msg2_tag; 
-          msg1_type <= `MSG_TYPE_EMPTY; end
+          msg1_type <= `MSG_TYPE_EMPTY;
+          msg3_type <= `MSG_TYPE_EMPTY; end
       endcase
     end
     else if (msg1_type == `MSG_TYPE_EMPTY) begin

@@ -3,9 +3,12 @@
 
 `define CORE_NUMBER 2
 `define CORE_NUMBER_WIDTH 1
-`define OWNER_BITS  6
+`define MEM_SIZE    32
+
+`define OWNER_BITS  1
 `define DATA_WIDTH  64
-`define TAG_WIDTH   26
+`define TAG_WIDTH   5
+`define TAG_ARRAY   32
 `define MSG_WIDTH   8
 `define DIR_WIDTH   2
 `define MESI_WIDTH  2
@@ -16,6 +19,18 @@
 `define MESI_S 2'd1
 `define MESI_E 2'd2
 `define MESI_M 2'd3
+
+// DIRTY state in Directory
+
+`define INVAL 2'd0
+`define ERROR 2'd1
+`define CLEAN 2'd2
+`define DIRTY 2'd3
+
+// Directory FSM state
+`define STATE_INVAL 2'd0
+`define STATE_WAIT  2'd1
+`define STATE_PENDING 2'd2
 
 // Requests from L15 to L2
 // Should always make #0 an error

@@ -37,6 +37,9 @@ PMESH_L2_ILA::PMESH_L2_ILA()
       // not specifying these updates:   
       msg2_type       (model.NewBvState("msg2_type", NOC_MSG_WIDTH) ),
       mesi_send       (model.NewBvState("mesi_send", MESI_WIDTH)),
+      msg2_data       (model.NewBvState("msg2_data", DATA_WIDTH)),
+      msg2_tag        (model.NewBvState("msg2_tag", TAG_WIDTH)),
+      msg2_load_tag   (model.NewBvState("msg2_load_tag", TAG_WIDTH)),
 
       // architecture states
       cache_vd        (model.NewBvState("cache_vd", 2)),
@@ -232,6 +235,9 @@ PMESH_L2_ILA::PMESH_L2_ILA()
                                Ite(cache_state == L2_MESI_E, Ite(request_from_owner, MSG_TYPE_DATA_ACK, 
                                                                                      MSG_TYPE_LOAD_FWD), 
                                                                                      MSG_TYPE_DATA_ACK))));
+    instr.SetUpdate(msg2_data, cache_data);
+    instr.SetUpdate(msg2_tag, cache_tag);
+    instr.SetUpdate(mesi_send, cache_state);
   }
 
   // STORE_REQ
@@ -270,15 +276,9 @@ PMESH_L2_ILA::PMESH_L2_ILA()
                                                                                      MSG_TYPE_STORE_FWD),
                                Ite(cache_state == L2_MESI_S, MSG_TYPE_INV_FWD, 
                                                              MSG_TYPE_DATA_ACK)))));
-  }
-
-  // WBGUARD_REQ (evict = 0)
-  {
-    auto instr = model.NewInstr("WBGUARD_REQ");
-
-    instr.SetDecode( ( msg3_type == MSG_TYPE_WBGUARD_REQ)  );
-    
-    // just for race condition, do nothing
+    instr.SetUpdate(msg2_data, cache_data);
+    instr.SetUpdate(msg2_tag, cache_tag);
+    instr.SetUpdate(mesi_send, L2_MESI_M);
   }
 
   // ************************************ //
@@ -302,6 +302,7 @@ PMESH_L2_ILA::PMESH_L2_ILA()
     // and then the data is dirty
     instr.SetUpdate(cache_vd, Ite(cache_state == L2_MESI_E, L2_DIRTY, cache_vd));
 
+    instr.SetUpdate(share_list, BvConst(1,DIR_WIDTH) << msg3_source.ZExt(DIR_WIDTH))
     
   }
 
@@ -327,10 +328,13 @@ PMESH_L2_ILA::PMESH_L2_ILA()
     auto instr = model.NewInstr("INV_FWDACK");
 
     instr.SetDecode( ( msg3_type == MSG_TYPE_INV_FWDACK)  );
-    
-    instr.SetUpdate(cur_msg_state, STATE_PENDING);
+
+    auto share_list_update = (share_list | ~(BvConst(1,DIR_WIDTH) << msg3_source.ZExt(DIR_WIDTH)) );
+
+    instr.SetUpdate(share_list, share_list_update );
+    instr.SetUpdate(cur_msg_state, Ite(share_list_update == 0, STATE_PENDING,cur_msg_state));
     // current L2 will be I
-    instr.SetUpdate(cache_state, L2_MESI_I);
+    instr.SetUpdate(cache_state, Ite(share_list_update == 0, L2_MESI_I, cache_state));
   }
 
   // WB_REQ
@@ -359,7 +363,7 @@ PMESH_L2_ILA::PMESH_L2_ILA()
     instr.SetUpdate(cur_msg_state, STATE_PENDING);
 
     instr.SetUpdate(cache_data, msg3_data);
-    instr.SetUpdate(cache_tag, cur_msg_tag);
+    instr.SetUpdate(cache_tag, msg3_tag);
     instr.SetUpdate(cache_vd, L2_CLEAN);
   }
 

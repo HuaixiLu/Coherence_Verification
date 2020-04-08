@@ -51,6 +51,9 @@ protected:
 
   // -------- output ------- //
   ExprRef msg2_type;
+  ExprRef msg2_data;
+  ExprRef msg2_tag;
+  ExprRef msg2_load_tag;
   ExprRef mesi_send;
 
   ExprRef cache_tag;
