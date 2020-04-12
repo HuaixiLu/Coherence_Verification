@@ -55,7 +55,8 @@ always @(posedge clk) begin
           msg3_data <= cache_data;
           msg3_type <= `MSG_TYPE_STORE_FWDACK; end
       `MSG_TYPE_LOAD_FWD: begin 
-          cache_state <= `MESI_S;
+          cache_state <= (cache_state != `MESI_I) ? `MESI_S : cache_state;
+          msg3_data <= cache_data;
           msg3_type <= `MSG_TYPE_LOAD_FWDACK; end
       `MSG_TYPE_DATA_ACK: begin
           cache_state <=  mesi_send;
@@ -63,6 +64,7 @@ always @(posedge clk) begin
           cache_tag <= msg2_tag; 
           msg1_type <= `MSG_TYPE_EMPTY;
           msg3_type <= `MSG_TYPE_EMPTY; end
+      `MSG_TYPE_NODATA_ACK: msg3_type <= `MSG_TYPE_EMPTY;
       endcase
     end
     else if (msg1_type == `MSG_TYPE_EMPTY) begin
@@ -76,18 +78,22 @@ always @(posedge clk) begin
           msg1_tag <= core_tag;
           if (cache_state == `MESI_M) begin
             msg3_type <= `MSG_TYPE_WB_REQ;
-            msg3_data <= cache_data; end
+            msg3_data <= cache_data;
+            cache_state <= `MESI_I;  end
           end
       end
       2'd1: begin
         if(cache_state == `MESI_I || cache_state == `MESI_S) begin // data updated?
           msg1_type <= `MSG_TYPE_STORE_REQ;
-          msg1_tag <= core_tag; end
+          msg1_tag <= core_tag;
+          msg1_data <= core_data; end
         else if(core_tag != cache_tag) begin
           msg1_type <= `MSG_TYPE_STORE_REQ;
           msg1_tag <= core_tag;
-          msg3_type <= `MSG_TYPE_WB_REQ;
-          msg3_data <= cache_data; end
+          msg3_type <= (cache_state == `MESI_M) ? `MSG_TYPE_WB_REQ : `MSG_TYPE_EMPTY;
+          msg3_data <= cache_data;
+          msg1_data <= core_data;
+          cache_state <= (cache_state == `MESI_M) ? `MESI_I : cache_state; end
         else begin
           cache_state <= `MESI_M;
           cache_data <= core_data; end

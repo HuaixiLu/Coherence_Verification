@@ -1,16 +1,16 @@
 /// Cache Coherence Protocol
 ///  Huaixi Lu (huaixil@princeton.edu)
 
-`define CORE_NUMBER 2
-`define CORE_NUMBER_WIDTH 1
+`define CORE_NUMBER 4
+`define CORE_NUMBER_WIDTH 2
+`define DIR_WIDTH   `CORE_NUMBER
+`define OWNER_BITS  `CORE_NUMBER_WIDTH
 `define MEM_SIZE    32
 
-`define OWNER_BITS  1
 `define DATA_WIDTH  64
 `define TAG_WIDTH   5
 `define TAG_ARRAY   32
 `define MSG_WIDTH   8
-`define DIR_WIDTH   2
 `define MESI_WIDTH  2
 
 // MESI states
@@ -59,4 +59,5 @@
 `define MSG_TYPE_STORE_MEM_ACK      8'd25
 
 //Acks from L2 to L15
+`define MSG_TYPE_NODATA_ACK         8'd28
 `define MSG_TYPE_DATA_ACK           8'd29

@@ -8,6 +8,7 @@ int main(int argc, char **argv) {
 
   // build the model
   PMESH_L1_ILA l15;
+  PMESH_L2_ILA l2;
   
   auto vtg_cfg = SetConfiguration();
   
@@ -16,7 +17,10 @@ int main(int argc, char **argv) {
   l15.model.ExportToVerilog(fw_verilog);
   fw_verilog.close();
 
-
+  verilog_file_name = "l2_ila.v";
+  fw_verilog.open(verilog_file_name);
+  l2.model.ExportToVerilog(fw_verilog);
+  fw_verilog.close();
   return 0;
 }
 

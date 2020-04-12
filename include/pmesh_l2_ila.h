@@ -14,11 +14,10 @@ using namespace ilang;
 #define NOC_MSG_WIDTH 8
 #define MESI_WIDTH    2
 #define DATA_WIDTH    64
-#define TAG_WIDTH     26
-#define FETCH_STATE_WIDTH     3
+#define TAG_WIDTH     5
 #define MSG_CACHE_TYPE_WIDTH  1
-#define L2_OWNER_BITS         6
-#define DIR_WIDTH    64
+#define L2_OWNER_BITS         2
+#define DIR_WIDTH    4
 
 #define b0 BoolConst(false)
 #define b1 BoolConst(true)
@@ -53,7 +52,6 @@ protected:
   ExprRef msg2_type;
   ExprRef msg2_data;
   ExprRef msg2_tag;
-  ExprRef msg2_load_tag;
   ExprRef mesi_send;
 
   ExprRef cache_tag;

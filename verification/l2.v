@@ -20,7 +20,6 @@ module l2 (
   output reg [`MSG_WIDTH - 1 : 0] msg2_type,
   output reg [`DATA_WIDTH - 1 : 0] msg2_data,
   output reg [`TAG_WIDTH - 1 : 0] msg2_tag,
-  output reg [`TAG_WIDTH - 1 : 0] msg2_load_tag,
   output reg [`MESI_WIDTH - 1 : 0] mesi_send,
 
   output reg [`OWNER_BITS - 1 : 0] cache_owner,
@@ -40,6 +39,7 @@ reg [1 : 0]              cur_msg_state;
 reg [`MSG_WIDTH - 1 : 0] cur_msg_type;
 reg [`OWNER_BITS - 1: 0] cur_msg_source;
 reg [`TAG_WIDTH - 1 : 0] cur_msg_tag;
+reg [`DATA_WIDTH -1 : 0] cur_msg_data;
 
 always @(posedge clk) begin
   if (rst) begin
@@ -66,6 +66,8 @@ always @(posedge clk) begin
       cache_state <= `MESI_I;
       cache_data <= msg3_data;
       cache_vd <= `DIRTY;
+      msg2_type <= `MSG_TYPE_NODATA_ACK;
+      cur_msg_state <= (cur_msg_state == `STATE_WAIT) ? `STATE_PENDING: cur_msg_state;
     end
     else
     case(cur_msg_state)
@@ -73,7 +75,7 @@ always @(posedge clk) begin
                 cur_msg_source <= msg1_source;
                 cur_msg_type <= msg1_type;
                 cur_msg_tag <= msg1_tag;
-                msg2_load_tag <= msg1_tag;
+                cur_msg_data <= msg1_data;
                 case (msg1_type)
                 `MSG_TYPE_LOAD_REQ: if (cache_vd == `INVAL) begin // empty
                                         cur_msg_state <= `STATE_WAIT;                                     
@@ -87,7 +89,8 @@ always @(posedge clk) begin
                                         else if (cache_state == `MESI_E) msg2_type <= `MSG_TYPE_STORE_FWD;
                                         else if (cache_vd == `DIRTY) begin // add LOAD further
                                           msg2_type <= `MSG_TYPE_STORE_MEM;
-                                          msg2_tag <= msg1_tag; end
+                                          msg2_tag <= cache_tag; 
+                                          cache_vd <= `INVAL; end
                                         else begin msg2_type <= `MSG_TYPE_LOAD_MEM;
                                                    msg2_tag <= msg1_tag; end
                                       end
@@ -120,20 +123,25 @@ always @(posedge clk) begin
                                         else if (cache_state == `MESI_E) msg2_type <= `MSG_TYPE_STORE_FWD;
                                         else if (cache_vd == `DIRTY) begin // add LOAD further // flag to see whether enter
                                           msg2_type <= `MSG_TYPE_STORE_MEM;
-                                          msg2_tag <= msg1_tag; end
+                                          msg2_tag <= cache_tag; 
+                                          cache_vd <= `INVAL; end
                                         else begin msg2_type <= `MSG_TYPE_LOAD_MEM;
                                                    msg2_tag <= msg1_tag; end
                                       end
                                       else begin // hit
                                         if(cache_state == `MESI_E & cache_owner != msg1_source) begin
-                                          msg2_type <= `MSG_TYPE_LOAD_FWD;
+                                          msg2_type <= `MSG_TYPE_STORE_FWD;
+                                          cur_msg_state <= `STATE_WAIT;
+                                        end
+                                        else if (cache_state == `MESI_S) begin 
+                                          msg2_type <= `MSG_TYPE_INV_FWD;
                                           cur_msg_state <= `STATE_WAIT;
                                         end
                                         else begin
                                           cache_owner <= msg1_source;
                                           cur_msg_state <= `STATE_INVAL;
                                           msg2_type <= `MSG_TYPE_DATA_ACK;
-                                          msg2_data <= cache_data;
+                                          msg2_data <= msg1_data;
                                           msg2_tag <= cache_tag;
                                           mesi_send <= `MESI_M;
                                           cache_state <= `MESI_E;
@@ -144,7 +152,7 @@ always @(posedge clk) begin
     `STATE_WAIT:  case (msg3_type)
                 `MSG_TYPE_LOAD_FWDACK: begin
                   cur_msg_state <= `STATE_PENDING;
-                  cache_state <= `MESI_S;
+                  cache_state <=  `MESI_S;
                   cache_data <= msg3_data;
                   cache_vd <= `DIRTY;
                   share_list <= (1 << msg3_source);
@@ -153,7 +161,7 @@ always @(posedge clk) begin
                   cur_msg_state <= `STATE_PENDING;
                   cache_state <= `MESI_I;
                   cache_data <= msg3_data;
-                  cache_vd <= `DIRTY;
+                  cache_vd <= (cache_state == `MESI_E) ? `DIRTY : cache_vd;
                 end
                 `MSG_TYPE_INV_FWDACK: begin
                   share_list <= ~(1 << msg3_source) & share_list;
@@ -168,17 +176,23 @@ always @(posedge clk) begin
                   cache_tag  <= msg3_tag;
                   cache_vd <= `CLEAN;
                 end
+                `MSG_TYPE_STORE_MEM_ACK: cur_msg_state <= `STATE_PENDING;
                 endcase
     `STATE_PENDING: case(cur_msg_type)
-                  `MSG_TYPE_LOAD_REQ: if (msg1_tag != cache_tag) begin // evict
+                  `MSG_TYPE_LOAD_REQ: if (cache_vd == `INVAL) begin // empty
+                                        cur_msg_state <= `STATE_WAIT;                                     
+                                        msg2_type <= `MSG_TYPE_LOAD_MEM;
+                                        msg2_tag <= cur_msg_tag; 
+                                      end
+                                      else if (cur_msg_tag != cache_tag) begin // evict
                                         cur_msg_state <= `STATE_WAIT;
-                                        msg2_load_tag <= cur_msg_tag;
                                         if (cache_vd == `DIRTY) begin // add LOAD further
                                           msg2_type <= `MSG_TYPE_STORE_MEM;
-                                          msg2_tag <= msg1_tag; end
+                                          msg2_tag <= cache_tag; 
+                                          cache_vd <= `INVAL; end
                                         else begin 
                                           msg2_type <= `MSG_TYPE_LOAD_MEM;
-                                          msg2_tag <= msg1_tag; end
+                                          msg2_tag <= cur_msg_tag; end
                                       end
                                       else begin // hit
                                         if (cache_state == `MESI_I) cache_state <= `MESI_E;
@@ -189,22 +203,27 @@ always @(posedge clk) begin
                                         msg2_tag <= cache_tag;
                                         mesi_send <= (cache_state == `MESI_I) ? `MESI_E: cache_state;
                                         if (cache_state == `MESI_S) 
-                                          share_list <= (1 << msg1_source) | share_list;
+                                          share_list <= (1 << cur_msg_source) | share_list;
                                       end
-                  `MSG_TYPE_STORE_REQ:if (msg1_tag != cache_tag) begin // evict
+                  `MSG_TYPE_STORE_REQ:if (cache_vd == `INVAL) begin // empty
+                                        cur_msg_state <= `STATE_WAIT;                                     
+                                        msg2_type <= `MSG_TYPE_LOAD_MEM;
+                                        msg2_tag <= cur_msg_tag; 
+                                      end
+                                      else if (cur_msg_tag != cache_tag) begin // evict
                                         cur_msg_state <= `STATE_WAIT;
-                                        msg2_load_tag <= cur_msg_tag;
                                         if (cache_vd == `DIRTY) begin // add LOAD further
                                           msg2_type <= `MSG_TYPE_STORE_MEM;
-                                          msg2_tag <= msg1_tag; end
+                                          msg2_tag <= cache_tag; 
+                                          cache_vd <= `INVAL; end
                                         else begin msg2_type <= `MSG_TYPE_LOAD_MEM;
-                                                   msg2_tag <= msg1_tag; end
+                                                   msg2_tag <= cur_msg_tag; end
                                       end
                                       else begin // hit
                                         cache_owner <= cur_msg_source;
                                         cur_msg_state <= `STATE_INVAL;
                                         msg2_type <= `MSG_TYPE_DATA_ACK;
-                                        msg2_data <= cache_data;
+                                        msg2_data <= cur_msg_data;
                                         msg2_tag <= cache_tag;
                                         mesi_send <= `MESI_M;
                                         cache_state <= `MESI_E;

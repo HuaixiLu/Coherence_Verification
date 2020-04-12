@@ -39,7 +39,6 @@ PMESH_L2_ILA::PMESH_L2_ILA()
       mesi_send       (model.NewBvState("mesi_send", MESI_WIDTH)),
       msg2_data       (model.NewBvState("msg2_data", DATA_WIDTH)),
       msg2_tag        (model.NewBvState("msg2_tag", TAG_WIDTH)),
-      msg2_load_tag   (model.NewBvState("msg2_load_tag", TAG_WIDTH)),
 
       // architecture states
       cache_vd        (model.NewBvState("cache_vd", 2)),
@@ -148,7 +147,7 @@ PMESH_L2_ILA::PMESH_L2_ILA()
   // auto MSG_TYPE_NC_LOAD_MEM_ACK    =BvConst(26, L2_MSG_WIDTH);
   // auto MSG_TYPE_NC_STORE_MEM_ACK   =BvConst(27, L2_MSG_WIDTH);
   // Acks from L2 to L15
-  // auto MSG_TYPE_NODATA_ACK         =BvConst(28, L2_MSG_WIDTH);
+  auto MSG_TYPE_NODATA_ACK         =BvConst(28, L2_MSG_WIDTH);
   auto MSG_TYPE_DATA_ACK           =BvConst(29, L2_MSG_WIDTH);
   /*
    // auto MSG_TYPE_ERROR              =BvConst(30, L2_MSG_WIDTH);
@@ -190,6 +189,26 @@ PMESH_L2_ILA::PMESH_L2_ILA()
 
   // add instructions
 
+  // WB_REQ
+  {
+    auto instr = model.NewInstr("WB_REQ");
+
+    instr.SetDecode( ( msg3_type == MSG_TYPE_WB_REQ)  );
+
+    // in this case, since L2 is inclusive of L1.5, there must be a hit
+    instr.SetUpdate(cache_state, L2_MESI_I);
+    instr.SetUpdate(cache_data, msg3_data);
+    instr.SetUpdate(cache_vd, L2_DIRTY);
+
+    instr.SetUpdate(cur_msg_state, Ite(cur_msg_state == STATE_WAIT, STATE_PENDING, cur_msg_state));
+    instr.SetUpdate(cur_msg_type, cur_msg_type);
+    instr.SetUpdate(cur_msg_source, cur_msg_source);
+    instr.SetUpdate(cur_msg_tag, cur_msg_tag);
+
+    instr.SetUpdate(msg2_type, MSG_TYPE_NODATA_ACK);
+    instr.SetUpdate(cache_owner, cache_owner);
+  }
+
   // ****************** //
   // pipe1 for msg1     //
   // L1.5 to L2         //
@@ -213,9 +232,8 @@ PMESH_L2_ILA::PMESH_L2_ILA()
     // Only when data is stored in L2(tag_hit), the cache state will be updated. I->E
     // For other read cases, the cache state won't change
     instr.SetUpdate(cache_state, Ite(tag_hit == b1, Ite(cache_state == L2_MESI_I, L2_MESI_E, cache_state), cache_state));
-    instr.SetUpdate(cache_owner, Ite(req_done, 
-                                  Ite(cache_state == L2_MESI_I, Ite(cur_msg_state == STATE_INVAL, msg1_source, cur_msg_source), cache_owner),
-                                  Ite(evict == b1 & cache_state == L2_MESI_S, unknown_range(0,63), cache_owner)) );
+    instr.SetUpdate(cache_owner, Ite(req_done, Ite(cur_msg_state == STATE_INVAL, msg1_source, cur_msg_source),
+                                  Ite(evict == b1 & cache_state == L2_MESI_S, unknown_range(0, DIR_WIDTH - 1), cache_owner)) );
     instr.SetUpdate(cache_vd, Ite(evict == b1, Ite(cache_state == L2_MESI_I, L2_INVAL, cache_vd), cache_vd));
     instr.SetUpdate(cache_tag, cache_tag);
 
@@ -227,7 +245,7 @@ PMESH_L2_ILA::PMESH_L2_ILA()
     // Send out Coherence Request
     instr.SetUpdate(msg2_type, Ite(evict == b1, Ite(cache_state == L2_MESI_I, Ite(cache_vd == L2_DIRTY, 
                                                                               MSG_TYPE_STORE_MEM, 
-                                                                              MSG_TYPE_LOAD_MEM), // shuld also STORE_MEM if data is dirty
+                                                                              MSG_TYPE_LOAD_MEM),
                                                 Ite(cache_state == L2_MESI_S, MSG_TYPE_INV_FWD, 
                                                                               MSG_TYPE_STORE_FWD)), // cache_state = E
                                Ite(empty == b1,                               MSG_TYPE_LOAD_MEM,
@@ -236,8 +254,8 @@ PMESH_L2_ILA::PMESH_L2_ILA()
                                                                                      MSG_TYPE_LOAD_FWD), 
                                                                                      MSG_TYPE_DATA_ACK))));
     instr.SetUpdate(msg2_data, cache_data);
-    instr.SetUpdate(msg2_tag, cache_tag);
-    instr.SetUpdate(mesi_send, cache_state);
+    instr.SetUpdate(msg2_tag, Ite(cache_vd == L2_DIRTY, cache_tag, Ite(cur_msg_state == STATE_INVAL, msg1_tag, cur_msg_tag)));
+    instr.SetUpdate(mesi_send, Ite(cache_state == L2_MESI_S, cache_state, L2_MESI_E));
   }
 
   // STORE_REQ
@@ -260,11 +278,12 @@ PMESH_L2_ILA::PMESH_L2_ILA()
     instr.SetUpdate(cache_tag, cache_tag);
     instr.SetUpdate(cache_owner, Ite(req_done, 
                                   Ite(cache_state == L2_MESI_I, Ite(cur_msg_state == STATE_INVAL, msg1_source, cur_msg_source), cache_owner),
-                                  Ite(cache_state == L2_MESI_S, unknown_range(0,63), cache_owner)) );
+                                  Ite(cache_state == L2_MESI_S, unknown_range(0, DIR_WIDTH - 1), cache_owner)) );
 
     // Sharer list
     instr.SetUpdate(share_list, share_list);
 
+    // Send out Coherence Request
     instr.SetUpdate(msg2_type, Ite(evict == b1, Ite(cache_state == L2_MESI_I, Ite(cache_vd == L2_DIRTY, 
                                                                               MSG_TYPE_STORE_MEM, 
                                                                               MSG_TYPE_LOAD_MEM),
@@ -277,7 +296,7 @@ PMESH_L2_ILA::PMESH_L2_ILA()
                                Ite(cache_state == L2_MESI_S, MSG_TYPE_INV_FWD, 
                                                              MSG_TYPE_DATA_ACK)))));
     instr.SetUpdate(msg2_data, cache_data);
-    instr.SetUpdate(msg2_tag, cache_tag);
+    instr.SetUpdate(msg2_tag, Ite(cache_vd == L2_DIRTY, cache_tag, Ite(cur_msg_state == STATE_INVAL, msg1_tag, cur_msg_tag)));
     instr.SetUpdate(mesi_send, L2_MESI_M);
   }
 
@@ -302,7 +321,7 @@ PMESH_L2_ILA::PMESH_L2_ILA()
     // and then the data is dirty
     instr.SetUpdate(cache_vd, Ite(cache_state == L2_MESI_E, L2_DIRTY, cache_vd));
 
-    instr.SetUpdate(share_list, BvConst(1,DIR_WIDTH) << msg3_source.ZExt(DIR_WIDTH))
+    instr.SetUpdate(share_list, BvConst(1,DIR_WIDTH) << msg3_source.ZExt(DIR_WIDTH));
     
   }
 
@@ -329,24 +348,12 @@ PMESH_L2_ILA::PMESH_L2_ILA()
 
     instr.SetDecode( ( msg3_type == MSG_TYPE_INV_FWDACK)  );
 
-    auto share_list_update = (share_list | ~(BvConst(1,DIR_WIDTH) << msg3_source.ZExt(DIR_WIDTH)) );
+    auto share_list_update = (share_list & ~(BvConst(1,DIR_WIDTH) << msg3_source.ZExt(DIR_WIDTH)) );
 
     instr.SetUpdate(share_list, share_list_update );
     instr.SetUpdate(cur_msg_state, Ite(share_list_update == 0, STATE_PENDING,cur_msg_state));
     // current L2 will be I
     instr.SetUpdate(cache_state, Ite(share_list_update == 0, L2_MESI_I, cache_state));
-  }
-
-  // WB_REQ
-  {
-    auto instr = model.NewInstr("WB_REQ");
-
-    instr.SetDecode( ( msg3_type == MSG_TYPE_WB_REQ)  );
-
-    // in this case, since L2 is inclusive of L1.5, there must be a hit
-    instr.SetUpdate(cache_state, L2_MESI_I);
-    instr.SetUpdate(cache_data, msg3_data);
-    instr.SetUpdate(cache_vd, L2_DIRTY);
   }
 
   // *************** //
@@ -373,7 +380,7 @@ PMESH_L2_ILA::PMESH_L2_ILA()
 
     instr.SetDecode( ( msg3_type == MSG_TYPE_STORE_MEM_ACK)  );
     
-    // coherence does nothing?
+    instr.SetUpdate(cur_msg_state, STATE_PENDING);
   }
 
 

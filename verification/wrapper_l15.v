@@ -3,7 +3,7 @@
 
 `include "ccp_define.h"
 
-module wrapper (
+module wrapper_l15 (
   input wire clk,
   input wire rst
 );
@@ -16,6 +16,7 @@ wire [1:0] core_req_input;
 wire [`MSG_WIDTH - 1 : 0] msg2_type_input;
 wire [`DATA_WIDTH - 1 : 0] msg2_data_input;
 wire [`TAG_WIDTH - 1 : 0] msg2_tag_input;
+wire [`MESI_WIDTH - 1 : 0] mesi_send_input;
 
 // Output
 
@@ -37,7 +38,7 @@ wire [`TAG_WIDTH - 1 : 0]  msg3_tag_fsm;
 
 PMESH_L1_ILA l15_ila (
 
-  .__ILA_PMESH_L1_ILA_grant__ (6'b111111),
+  .__ILA_PMESH_L1_ILA_grant__ (7'b1111111),
   .clk (clk),
   .rst (rst),
   .core_data (core_data_input),
@@ -46,6 +47,7 @@ PMESH_L1_ILA l15_ila (
   .msg2_data (msg2_data_input),
   .msg2_type (msg2_type_input),
   .msg2_tag  (msg2_tag_input),
+  .mesi_send (mesi_send_input),
 
   .__ILA_PMESH_L1_ILA_acc_decode__ (),
   .__ILA_PMESH_L1_ILA_decode_of_DATA_ACK__ (),
@@ -76,6 +78,7 @@ l15 l15_fsm (
   .msg2_type (msg2_type_input),
   .msg2_data (msg2_data_input),
   .msg2_tag  (msg2_tag_input),
+  .mesi_send (mesi_send_input),
 
   .core_req (core_req_input),
   .core_tag (core_tag_input),

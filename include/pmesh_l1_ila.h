@@ -1,4 +1,4 @@
-/// \file the cache ila example of OpenPiton L2 ILA (in aim of verifying the cache coherence protocol)
+/// \file the cache ila example of OpenPiton L1 ILA (in aim of verifying the cache coherence protocol)
 ///  Huaixi Lu (huaixil@princeton.edu)
 ///
 
@@ -15,9 +15,8 @@ using namespace ilang;
 #define CORE_MSG_WIDTH 2
 #define MESI_WIDTH     2
 #define DATA_WIDTH     64
-#define TAG_WIDTH      26
-#define FETCH_STATE_WIDTH     3
-#define DIR_WIDTH    64
+#define TAG_WIDTH      5
+#define DIR_WIDTH    4
 
 #define b0 BoolConst(false)
 #define b1 BoolConst(true)

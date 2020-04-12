@@ -3,7 +3,7 @@
 
 `include "ccp_define.h" 
 
-module ccp (
+module ccp_ila (
   input wire clk,
   input wire rst
 );
@@ -18,7 +18,6 @@ wire [`OWNER_BITS - 1 : 0] msg1_source;
 wire [`MSG_WIDTH - 1 : 0] msg2_type;
 wire [`DATA_WIDTH - 1 : 0] msg2_data;
 wire [`TAG_WIDTH - 1 : 0] msg2_tag;
-wire [`TAG_WIDTH - 1 : 0] msg2_load_tag;
 wire [`MESI_WIDTH - 1 : 0] mesi_send;
 
 wire [`OWNER_BITS - 1 : 0] cache_owner;
@@ -38,7 +37,6 @@ L15cmp_mem pcache_mem(
   .msg2_type (msg2_type),
   .msg2_data (msg2_data),
   .msg2_tag  (msg2_tag),
-  .msg2_load_tag (msg2_load_tag),
   .mesi_send (mesi_send),
  
   .cache_owner(cache_owner),
@@ -55,9 +53,10 @@ L15cmp_mem pcache_mem(
   .msg3_source (msg3_source)
 );
 
-l2 l2(  
-  .clk,
-  .rst,
+PMESH_L2_ILA l2_ila(  
+  .clk (clk),
+  .rst (rst),
+  .__ILA_PMESH_L2_ILA_grant__ (8'b11111111),
 
   .msg1_type (msg1_type),
   .msg1_data (msg1_data),
@@ -69,14 +68,34 @@ l2 l2(
   .msg3_tag (msg3_tag),
   .msg3_source (msg3_source),
 
+  .__ILA_PMESH_L2_ILA_acc_decode__ (),
+  .__ILA_PMESH_L2_ILA_decode_of_INV_FWDACK__ (),
+  .__ILA_PMESH_L2_ILA_decode_of_LOAD_FWDACK__ (),
+  .__ILA_PMESH_L2_ILA_decode_of_LOAD_MEM_ACK__ (),
+  .__ILA_PMESH_L2_ILA_decode_of_LOAD_REQ__ (),
+  .__ILA_PMESH_L2_ILA_decode_of_STORE_FWDACK__ (),
+  .__ILA_PMESH_L2_ILA_decode_of_STORE_MEM_ACK__ (),
+  .__ILA_PMESH_L2_ILA_decode_of_STORE_REQ__ (),
+  .__ILA_PMESH_L2_ILA_decode_of_WB_REQ__ (),
+  .__ILA_PMESH_L2_ILA_valid__ (),
+
   .msg2_type (msg2_type),
   .msg2_data (msg2_data),
   .msg2_tag  (msg2_tag),
-  .msg2_load_tag (msg2_load_tag),
   .mesi_send (mesi_send),
  
   .cache_owner(cache_owner),
-  .share_list (share_list)
+  .share_list (share_list),
+  
+  .cache_tag (),
+  .cache_vd (),
+  .cache_state (),
+  .cache_data (),
+
+  .cur_msg_state (),
+  .cur_msg_type (),
+  .cur_msg_source (),
+  .cur_msg_tag ()
 );
 
 endmodule

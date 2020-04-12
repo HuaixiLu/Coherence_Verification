@@ -130,7 +130,7 @@ PMESH_L1_ILA::PMESH_L1_ILA()
   // auto MSG_TYPE_NC_LOAD_MEM_ACK    =BvConst(26, L2_MSG_WIDTH);
   // auto MSG_TYPE_NC_STORE_MEM_ACK   =BvConst(27, L2_MSG_WIDTH);
   // Acks from L2 to L15
-  // auto MSG_TYPE_NODATA_ACK         =BvConst(28, L2_MSG_WIDTH);
+  auto MSG_TYPE_NODATA_ACK         =BvConst(28, L2_MSG_WIDTH);
   auto MSG_TYPE_DATA_ACK           =BvConst(29, L2_MSG_WIDTH);
   /*
    // auto MSG_TYPE_ERROR              =BvConst(30, L2_MSG_WIDTH);
@@ -179,7 +179,7 @@ PMESH_L1_ILA::PMESH_L1_ILA()
     instr.SetDecode(msg2_type == MSG_TYPE_LOAD_FWD);
     
     // E or M downgrades to S, since there are two private caches own the data
-    instr.SetUpdate(cache_state, MESI_S);
+    instr.SetUpdate(cache_state, Ite(cache_state != MESI_I, MESI_S, cache_state));
     // update L2 cache data
     instr.SetUpdate(msg3_data, cache_data);
     instr.SetUpdate(msg3_type, MSG_TYPE_LOAD_FWDACK);
@@ -206,6 +206,7 @@ PMESH_L1_ILA::PMESH_L1_ILA()
     instr.SetDecode(msg2_type == MSG_TYPE_INV_FWD);
     
     instr.SetUpdate(cache_state, MESI_I);
+    instr.SetUpdate(msg3_data, cache_data);
     instr.SetUpdate(msg3_type, MSG_TYPE_INV_FWDACK);
   }
 
@@ -219,6 +220,16 @@ PMESH_L1_ILA::PMESH_L1_ILA()
     instr.SetUpdate(msg3_type, MSG_TYPE_EMPTY);
     instr.SetUpdate(cache_data, msg2_data);
     instr.SetUpdate(cache_tag, msg2_tag);
+    instr.SetUpdate(cache_state, mesi_send);
+  }
+
+  // NODATA_ACK
+  {
+    auto instr = model.NewInstr("NODATA_ACK");
+
+    instr.SetDecode(msg2_type == MSG_TYPE_NODATA_ACK);
+    
+    instr.SetUpdate(msg3_type, MSG_TYPE_EMPTY);
   }
 
   // Core Requests: Read && Write && Write Back
@@ -238,6 +249,7 @@ PMESH_L1_ILA::PMESH_L1_ILA()
     instr.SetUpdate(msg1_tag, core_tag);
 
     instr.SetUpdate(msg3_type, Ite(!tag_hit & (cache_state == MESI_M), MSG_TYPE_WB_REQ, msg3_type));
+    instr.SetUpdate(cache_state, Ite(!tag_hit & cache_state == MESI_M, MESI_I, cache_state) );
     instr.SetUpdate(msg3_data, cache_data);
   }
 
@@ -249,8 +261,8 @@ PMESH_L1_ILA::PMESH_L1_ILA()
     instr.SetUpdate(msg1_type,Ite( (cache_state == MESI_I) | (cache_state == MESI_S), MSG_TYPE_STORE_REQ, Ite(!tag_hit, MSG_TYPE_STORE_REQ, msg1_type)));
     instr.SetUpdate(msg1_tag, core_tag);
 
-    instr.SetUpdate(cache_state, Ite(tag_hit & cache_state == MESI_E, MESI_M, cache_state) );
-    instr.SetUpdate(cache_data, Ite(tag_hit & ( (cache_state == MESI_E) | (cache_state == MESI_M) ), core_data, cache_data) );
+    instr.SetUpdate(cache_state, Ite(tag_hit & cache_state == MESI_E, MESI_M, Ite(!tag_hit & (cache_state == MESI_M) , MESI_I, cache_state)) );
+    instr.SetUpdate(cache_data, core_data);
     
     instr.SetUpdate(msg3_type, Ite(!tag_hit & (cache_state == MESI_M), MSG_TYPE_WB_REQ, msg3_type));
     instr.SetUpdate(msg3_data, cache_data);
