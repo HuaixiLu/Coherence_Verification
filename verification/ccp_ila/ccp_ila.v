@@ -30,7 +30,7 @@ wire [`TAG_WIDTH - 1 : 0]  msg3_tag;
 wire [`OWNER_BITS - 1 : 0] msg3_source;
 
 
-L15cmp_mem pcache_mem(
+L15cmp_mem_ila pcache_mem(
   .clk (clk),
   .rst (rst),
 
@@ -53,7 +53,7 @@ L15cmp_mem pcache_mem(
   .msg3_source (msg3_source)
 );
 
-PMESH_L2_ILA l2_ila(  
+PMESH_L2_ILA l2(  
   .clk (clk),
   .rst (rst),
   .__ILA_PMESH_L2_ILA_grant__ (8'b11111111),

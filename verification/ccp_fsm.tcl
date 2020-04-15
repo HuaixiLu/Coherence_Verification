@@ -1,8 +1,8 @@
 analyze -sva  \
-  l2.v \
-  l15.v \
-  l15cmp_mem.v \
-  ccp_fsm.v
+  ./ccp_fsm/l2.v \
+  ./ccp_fsm/l15.v \
+  ./ccp_fsm/l15cmp_mem.v \
+  ./ccp_fsm/ccp_fsm.v
 
 elaborate -top ccp_fsm
 clock clk

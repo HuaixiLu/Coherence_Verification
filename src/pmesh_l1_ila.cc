@@ -260,9 +260,10 @@ PMESH_L1_ILA::PMESH_L1_ILA()
 
     instr.SetUpdate(msg1_type,Ite( (cache_state == MESI_I) | (cache_state == MESI_S), MSG_TYPE_STORE_REQ, Ite(!tag_hit, MSG_TYPE_STORE_REQ, msg1_type)));
     instr.SetUpdate(msg1_tag, core_tag);
+    instr.SetUpdate(msg1_data, core_data);
 
     instr.SetUpdate(cache_state, Ite(tag_hit & cache_state == MESI_E, MESI_M, Ite(!tag_hit & (cache_state == MESI_M) , MESI_I, cache_state)) );
-    instr.SetUpdate(cache_data, core_data);
+    instr.SetUpdate(cache_data, Ite(tag_hit & (cache_state == MESI_E | cache_state == MESI_M), core_data, cache_data) );
     
     instr.SetUpdate(msg3_type, Ite(!tag_hit & (cache_state == MESI_M), MSG_TYPE_WB_REQ, msg3_type));
     instr.SetUpdate(msg3_data, cache_data);

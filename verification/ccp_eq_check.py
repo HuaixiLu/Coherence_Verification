@@ -7,7 +7,9 @@ f1 = open('./verification/ccp_eq_check.tcl', 'w+')
 f1.write("analyze -sva")
 f1.write(" ./ccp_ila/l2_ila.v")
 f1.write(" ./ccp_fsm/l2.v")
+f1.write(" ./ccp_ila/l15_ila.v")
 f1.write(" ./ccp_fsm/l15.v")
+f1.write(" ./ccp_ila/l15cmp_mem_ila.v")
 f1.write(" ./ccp_fsm/l15cmp_mem.v")
 f1.write(" ./ccp_ila/ccp_ila.v")
 f1.write(" ./ccp_fsm/ccp_fsm.v")
@@ -39,4 +41,7 @@ for i in range (CORE_NUMBER):
     else:
         f1.write("(ccp_fsm.pcache_mem.l15_%d.core_tag == ccp_ila.pcache_mem.l15_%d.core_tag) && " %(i,i))
 
-f1.write("assert -name same_msg {ccp_fsm.msg1_type == ccp_ila.msg1_type}\n")
+f1.write("assert -name same_msg1 {ccp_fsm.msg1_type == ccp_ila.msg1_type}\n")
+f1.write("assert -name same_msg2 {ccp_fsm.msg2_type == ccp_ila.msg2_type}\n")
+f1.write("assert -name same_msg3 {ccp_fsm.msg3_type == ccp_ila.msg3_type}\n")
+f1.write("assert -name same_cache {ccp_fsm.l2.cache_state == ccp_ila.l2.cache_state && ccp_fsm.l2.cache_data == ccp_ila.l2.cache_data && ccp_fsm.l2.cache_tag == ccp_ila.l2.cache_tag}\n")

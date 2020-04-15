@@ -66,7 +66,7 @@ protected:
   ExprRef cur_msg_type      ;
   ExprRef cur_msg_source    ;
   ExprRef cur_msg_tag       ;
-
+  ExprRef cur_msg_data      ;
   // --------------- HELPERS -------- //
   /// specify a nondeterministic value within range [low,high]
   ExprRef unknown_range(unsigned low, unsigned high);

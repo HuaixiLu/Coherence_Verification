@@ -1,6 +1,6 @@
 analyze -sva  \
-  l15_ila.v \
-  l15.v \
+  ./ccp_ila/l15_ila.v \
+  ./ccp_fsm/l15.v \
   wrapper_l15.v
 
 elaborate -top wrapper_l15

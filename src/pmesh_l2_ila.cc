@@ -55,7 +55,8 @@ PMESH_L2_ILA::PMESH_L2_ILA()
       cur_msg_state   (model.NewBvState("cur_msg_state", 2)),
       cur_msg_type    (model.NewBvState("cur_msg_type", NOC_MSG_WIDTH)),
       cur_msg_source  (model.NewBvState("cur_msg_source", L2_OWNER_BITS)),
-      cur_msg_tag     (model.NewBvState("cur_msg_tag" , TAG_WIDTH))
+      cur_msg_tag     (model.NewBvState("cur_msg_tag" , TAG_WIDTH)),
+      cur_msg_data    (model.NewBvState("cur_msg_data" , DATA_WIDTH))
 // -----------------------------------------------------------------------------------------------
 
 {
@@ -271,6 +272,7 @@ PMESH_L2_ILA::PMESH_L2_ILA()
     instr.SetUpdate(cur_msg_type  , Ite(req_done | (cur_msg_state == STATE_PENDING), cur_msg_type  , msg1_type));
     instr.SetUpdate(cur_msg_tag   , Ite(req_done | (cur_msg_state == STATE_PENDING), cur_msg_tag   , msg1_tag));
     instr.SetUpdate(cur_msg_source, Ite(req_done | (cur_msg_state == STATE_PENDING), cur_msg_source, msg1_source));
+    instr.SetUpdate(cur_msg_data,   Ite(req_done | (cur_msg_state == STATE_PENDING), cur_msg_data, msg1_data));
     instr.SetUpdate(cur_msg_state, Ite(req_done, STATE_INVAL, STATE_WAIT) );
     
     instr.SetUpdate(cache_state, Ite(tag_hit == b1, Ite(cache_state == L2_MESI_I, L2_MESI_E, cache_state), cache_state));
@@ -295,7 +297,7 @@ PMESH_L2_ILA::PMESH_L2_ILA()
                                                                                      MSG_TYPE_STORE_FWD),
                                Ite(cache_state == L2_MESI_S, MSG_TYPE_INV_FWD, 
                                                              MSG_TYPE_DATA_ACK)))));
-    instr.SetUpdate(msg2_data, cache_data);
+    instr.SetUpdate(msg2_data, Ite(req_done, Ite(cur_msg_state == STATE_INVAL, msg1_data, cur_msg_data), cache_data));
     instr.SetUpdate(msg2_tag, Ite(cache_vd == L2_DIRTY, cache_tag, Ite(cur_msg_state == STATE_INVAL, msg1_tag, cur_msg_tag)));
     instr.SetUpdate(mesi_send, L2_MESI_M);
   }

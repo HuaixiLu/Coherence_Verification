@@ -4,14 +4,14 @@ CORE_NUMBER = 4
 CORE_NUMBER_WIDTH = 2
 MEM_SIZE = 32
 
-f1 = open('./verification/ccp_fsm/l15cmp_mem.v', 'w+')
+f1 = open('./verification/ccp_ila/l15cmp_mem_ila.v', 'w+')
 
 f1.write("/// Cache Coherence Protocol\n")
 f1.write("/// Huaixi Lu (huaixil@princeton.edu)\n\n")
 f1.write('`include "ccp_define.h" \n\n')
 
 # declare the name for module
-f1.write( "module L15cmp_mem ( \n")
+f1.write( "module L15cmp_mem_ila ( \n")
 f1.write( "  input wire clk, \n")
 f1.write( "  input wire rst, \n")
 f1.write( "  // Channel 2 only needs to know where to go \n")
@@ -53,9 +53,10 @@ f1.write( "wire [`TAG_WIDTH - 1 : 0]  msg3_tag_core  [%d : 0];\n \n" % (CORE_NUM
 
 #declare different private cache modules
 for i in range(CORE_NUMBER):
-  f1.write( "l15 l15_%d (\n" % (i) )
+  f1.write( "PMESH_L1_ILA l15_%d (\n" % (i) )
   f1.write( "  .clk (clk),\n")
   f1.write( "  .rst (rst),\n")
+  f1.write( "  .__ILA_PMESH_L1_ILA_grant__ (7'b1111111),\n")
   f1.write( "  .msg2_type (msg2_type_core[%d]),\n" % (i) )
   f1.write( "  .msg2_data (msg2_data_core[%d]),\n" % (i) )
   f1.write( "  .msg2_tag  (msg2_tag_core[%d]),\n" % (i))

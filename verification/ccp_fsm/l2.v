@@ -90,7 +90,8 @@ always @(posedge clk) begin
                                         else if (cache_vd == `DIRTY) begin // add LOAD further
                                           msg2_type <= `MSG_TYPE_STORE_MEM;
                                           msg2_tag <= cache_tag; 
-                                          cache_vd <= `INVAL; end
+                                          cache_vd <= `INVAL;
+                                          msg2_data <= cache_data; end
                                         else begin msg2_type <= `MSG_TYPE_LOAD_MEM;
                                                    msg2_tag <= msg1_tag; end
                                       end
@@ -124,7 +125,8 @@ always @(posedge clk) begin
                                         else if (cache_vd == `DIRTY) begin // add LOAD further // flag to see whether enter
                                           msg2_type <= `MSG_TYPE_STORE_MEM;
                                           msg2_tag <= cache_tag; 
-                                          cache_vd <= `INVAL; end
+                                          cache_vd <= `INVAL;
+                                          msg2_data <= cache_data; end
                                         else begin msg2_type <= `MSG_TYPE_LOAD_MEM;
                                                    msg2_tag <= msg1_tag; end
                                       end
@@ -189,7 +191,8 @@ always @(posedge clk) begin
                                         if (cache_vd == `DIRTY) begin // add LOAD further
                                           msg2_type <= `MSG_TYPE_STORE_MEM;
                                           msg2_tag <= cache_tag; 
-                                          cache_vd <= `INVAL; end
+                                          cache_vd <= `INVAL;
+                                          msg2_data <= cache_data; end
                                         else begin 
                                           msg2_type <= `MSG_TYPE_LOAD_MEM;
                                           msg2_tag <= cur_msg_tag; end
@@ -215,7 +218,8 @@ always @(posedge clk) begin
                                         if (cache_vd == `DIRTY) begin // add LOAD further
                                           msg2_type <= `MSG_TYPE_STORE_MEM;
                                           msg2_tag <= cache_tag; 
-                                          cache_vd <= `INVAL; end
+                                          cache_vd <= `INVAL;
+                                          msg2_data <= cache_data; end
                                         else begin msg2_type <= `MSG_TYPE_LOAD_MEM;
                                                    msg2_tag <= cur_msg_tag; end
                                       end
