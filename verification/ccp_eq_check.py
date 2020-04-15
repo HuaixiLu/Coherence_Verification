@@ -5,12 +5,12 @@ MEM_SIZE = 32
 f1 = open('./verification/ccp_eq_check.tcl', 'w+')
 
 f1.write("analyze -sva")
-f1.write(" l2_ila.v")
-f1.write(" l2.v")
-f1.write(" l15.v")
-f1.write(" l15cmp_mem.v")
-f1.write(" ccp_ila.v")
-f1.write(" ccp_fsm.v")
+f1.write(" ./ccp_ila/l2_ila.v")
+f1.write(" ./ccp_fsm/l2.v")
+f1.write(" ./ccp_fsm/l15.v")
+f1.write(" ./ccp_fsm/l15cmp_mem.v")
+f1.write(" ./ccp_ila/ccp_ila.v")
+f1.write(" ./ccp_fsm/ccp_fsm.v")
 f1.write(" ccp_eq_wrapper.v")
 
 f1.write("\nelaborate -top ccp_eq_wrapper \n")

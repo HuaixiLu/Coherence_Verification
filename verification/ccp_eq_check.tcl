@@ -1,4 +1,4 @@
-analyze -sva l2_ila.v l2.v l15.v l15cmp_mem.v ccp_ila.v ccp_fsm.v ccp_eq_wrapper.v
+analyze -sva ./ccp_ila/l2_ila.v ./ccp_fsm/l2.v ./ccp_fsm/l15.v ./ccp_fsm/l15cmp_mem.v ./ccp_ila/ccp_ila.v ./ccp_fsm/ccp_fsm.v ccp_eq_wrapper.v
 elaborate -top ccp_eq_wrapper 
 clock clk 
 reset rst 

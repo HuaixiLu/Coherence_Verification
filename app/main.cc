@@ -12,12 +12,12 @@ int main(int argc, char **argv) {
   
   auto vtg_cfg = SetConfiguration();
   
-  std::string verilog_file_name = "l15_ila.v";
+  std::string verilog_file_name = "../verification/ccp_ila/l15_ila.v";
   std::ofstream fw_verilog(verilog_file_name);
   l15.model.ExportToVerilog(fw_verilog);
   fw_verilog.close();
 
-  verilog_file_name = "l2_ila.v";
+  verilog_file_name = "../verification/ccp_ila/l2_ila.v";
   fw_verilog.open(verilog_file_name);
   l2.model.ExportToVerilog(fw_verilog);
   fw_verilog.close();
