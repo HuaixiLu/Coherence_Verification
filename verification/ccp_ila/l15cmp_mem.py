@@ -2,7 +2,7 @@
 # Generate the composition of Private caches and Memory Structure
 CORE_NUMBER = 4
 CORE_NUMBER_WIDTH = 2
-MEM_SIZE = 32
+MEM_SIZE = 8
 
 f1 = open('./verification/ccp_ila/l15cmp_mem_ila.v', 'w+')
 

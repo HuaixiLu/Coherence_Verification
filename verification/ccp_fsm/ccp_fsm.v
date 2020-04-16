@@ -76,11 +76,11 @@ l2 l2(
   .share_list (share_list)
 );
 
-reg [8 : 0] counter_db;
+// reg [8 : 0] counter_db;
 
-always @(posedge clk) begin
-  if(rst) counter_db <= 0;
-  else counter_db <= counter_db + 1;
-end
+// always @(posedge clk) begin
+//   if(rst) counter_db <= 0;
+//   else counter_db <= counter_db + 1;
+// end
 
 endmodule

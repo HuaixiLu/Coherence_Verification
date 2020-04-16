@@ -172,30 +172,6 @@ always @(posedge clk) begin
     mem_data[5] <= 0;
     mem_data[6] <= 0;
     mem_data[7] <= 0;
-    mem_data[8] <= 0;
-    mem_data[9] <= 0;
-    mem_data[10] <= 0;
-    mem_data[11] <= 0;
-    mem_data[12] <= 0;
-    mem_data[13] <= 0;
-    mem_data[14] <= 0;
-    mem_data[15] <= 0;
-    mem_data[16] <= 0;
-    mem_data[17] <= 0;
-    mem_data[18] <= 0;
-    mem_data[19] <= 0;
-    mem_data[20] <= 0;
-    mem_data[21] <= 0;
-    mem_data[22] <= 0;
-    mem_data[23] <= 0;
-    mem_data[24] <= 0;
-    mem_data[25] <= 0;
-    mem_data[26] <= 0;
-    mem_data[27] <= 0;
-    mem_data[28] <= 0;
-    mem_data[29] <= 0;
-    mem_data[30] <= 0;
-    mem_data[31] <= 0;
     msg3_type_mem <= `MSG_TYPE_EMPTY; 
   end
   else if (msg2_type == `MSG_TYPE_LOAD_MEM) begin

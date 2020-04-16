@@ -5,11 +5,11 @@
 `define CORE_NUMBER_WIDTH 2
 `define DIR_WIDTH   `CORE_NUMBER
 `define OWNER_BITS  `CORE_NUMBER_WIDTH
-`define MEM_SIZE    32
+`define MEM_SIZE    8
+`define TAG_WIDTH   3
+`define TAG_ARRAY   8
 
 `define DATA_WIDTH  64
-`define TAG_WIDTH   5
-`define TAG_ARRAY   32
 `define MSG_WIDTH   8
 `define MESI_WIDTH  2
 

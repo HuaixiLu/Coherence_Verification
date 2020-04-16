@@ -237,6 +237,7 @@ PMESH_L2_ILA::PMESH_L2_ILA()
                                   Ite(evict == b1 & cache_state == L2_MESI_S, unknown_range(0, DIR_WIDTH - 1), cache_owner)) );
     instr.SetUpdate(cache_vd, Ite(evict == b1, Ite(cache_state == L2_MESI_I, L2_INVAL, cache_vd), cache_vd));
     instr.SetUpdate(cache_tag, cache_tag);
+    instr.SetUpdate(cache_data, cache_data);
 
     // Share list
     instr.SetUpdate(share_list, Ite(req_done & cache_state == L2_MESI_S, 
@@ -278,6 +279,7 @@ PMESH_L2_ILA::PMESH_L2_ILA()
     instr.SetUpdate(cache_state, Ite(tag_hit == b1, Ite(cache_state == L2_MESI_I, L2_MESI_E, cache_state), cache_state));
     instr.SetUpdate(cache_vd, Ite(evict == b1, Ite(cache_state == L2_MESI_I, L2_INVAL, cache_vd), cache_vd));
     instr.SetUpdate(cache_tag, cache_tag);
+    instr.SetUpdate(cache_data, cache_data);
     instr.SetUpdate(cache_owner, Ite(req_done, 
                                   Ite(cache_state == L2_MESI_I, Ite(cur_msg_state == STATE_INVAL, msg1_source, cur_msg_source), cache_owner),
                                   Ite(cache_state == L2_MESI_S, unknown_range(0, DIR_WIDTH - 1), cache_owner)) );
