@@ -206,7 +206,6 @@ PMESH_L1_ILA::PMESH_L1_ILA()
     instr.SetDecode(msg2_type == MSG_TYPE_INV_FWD);
     
     instr.SetUpdate(cache_state, MESI_I);
-    instr.SetUpdate(msg3_data, cache_data);
     instr.SetUpdate(msg3_type, MSG_TYPE_INV_FWDACK);
   }
 
