@@ -250,7 +250,7 @@ PMESH_L1_ILA::PMESH_L1_ILA()
 
     instr.SetUpdate(msg3_type, Ite(!tag_hit & (cache_state == MESI_M), MSG_TYPE_WB_REQ, msg3_type));
     instr.SetUpdate(cache_state, Ite(!tag_hit & cache_state == MESI_M, MESI_I, cache_state) );
-    instr.SetUpdate(msg3_data, cache_data);
+    instr.SetUpdate(msg3_data, Ite(!tag_hit& (cache_state == MESI_M), cache_data, msg3_data));
   }
 
   // write
@@ -266,7 +266,7 @@ PMESH_L1_ILA::PMESH_L1_ILA()
     instr.SetUpdate(cache_data, Ite(tag_hit & (cache_state == MESI_E | cache_state == MESI_M), core_data, cache_data) );
     
     instr.SetUpdate(msg3_type, Ite(!tag_hit & (cache_state == MESI_M), MSG_TYPE_WB_REQ, msg3_type));
-    instr.SetUpdate(msg3_data, cache_data);
+    instr.SetUpdate(msg3_data, Ite(!tag_hit, cache_data, msg3_data));
   }
 
 }
