@@ -9,7 +9,7 @@
 `define TAG_WIDTH   3
 `define TAG_ARRAY   8
 
-`define DATA_WIDTH  8
+`define DATA_WIDTH  2
 `define MSG_WIDTH   8
 `define MESI_WIDTH  2
 
