@@ -91,7 +91,7 @@ always @(posedge clk) begin
           msg1_type <= `MSG_TYPE_STORE_REQ;
           msg1_tag <= core_tag;
           msg3_type <= (cache_state == `MESI_M) ? `MSG_TYPE_WB_REQ : `MSG_TYPE_EMPTY;
-          msg3_data <= cache_data;
+          msg3_data <= (cache_state == `MESI_M) ? cache_data : msg3_data;
           msg1_data <= core_data;
           cache_state <= (cache_state == `MESI_M) ? `MESI_I : cache_state; end
         else begin
