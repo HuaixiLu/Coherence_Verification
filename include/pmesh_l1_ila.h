@@ -14,7 +14,7 @@ using namespace ilang;
 #define NOC_MSG_WIDTH  8
 #define CORE_MSG_WIDTH 2
 #define MESI_WIDTH     2
-#define DATA_WIDTH     2
+#define DATA_WIDTH     16
 #define TAG_WIDTH      3
 #define DIR_WIDTH    4
 

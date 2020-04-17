@@ -1,5 +1,5 @@
-CORE_NUMBER = 2
-CORE_NUMBER_WIDTH = 1
+CORE_NUMBER = 4
+CORE_NUMBER_WIDTH = 2
 MEM_SIZE = 8
 
 f1 = open('./verification/ccp_eq_check.tcl', 'w+')
