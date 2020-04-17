@@ -1,15 +1,15 @@
 /// Cache Coherence Protocol
 ///  Huaixi Lu (huaixil@princeton.edu)
 
-`define CORE_NUMBER 2
-`define CORE_NUMBER_WIDTH 1
+`define CORE_NUMBER 4
+`define CORE_NUMBER_WIDTH 2
 `define DIR_WIDTH   `CORE_NUMBER
 `define OWNER_BITS  `CORE_NUMBER_WIDTH
 `define MEM_SIZE    8
 `define TAG_WIDTH   3
 `define TAG_ARRAY   8
 
-`define DATA_WIDTH  2
+`define DATA_WIDTH  16
 `define MSG_WIDTH   8
 `define MESI_WIDTH  2
 
